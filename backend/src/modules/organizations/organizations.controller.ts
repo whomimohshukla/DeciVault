@@ -49,7 +49,7 @@ export async function list(req: AuthRequest, res: Response) {
 
 export async function get(req: AuthRequest, res: Response) {
   try {
-    const org = await getOrganization(req.params.organizationId);
+    const org = await getOrganization((req.params.organizationId as string));
     if (!org) {
       return res.status(404).json({ status: 'error', message: 'Organization not found' });
     }
@@ -70,7 +70,7 @@ export async function update(req: AuthRequest, res: Response) {
       });
     }
 
-    const org = await updateOrganization(req.params.organizationId, parsed.data);
+    const org = await updateOrganization((req.params.organizationId as string), parsed.data);
     return res.status(200).json({ status: 'success', data: { organization: org } });
   } catch (error: any) {
     if (error.message === 'Slug already exists') {
@@ -82,7 +82,7 @@ export async function update(req: AuthRequest, res: Response) {
 
 export async function remove(req: AuthRequest, res: Response) {
   try {
-    await deleteOrganization(req.params.organizationId);
+    await deleteOrganization((req.params.organizationId as string));
     return res.status(200).json({ status: 'success', message: 'Organization deleted' });
   } catch {
     return res.status(500).json({ status: 'error', message: 'Failed to delete organization' });

@@ -4,7 +4,12 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import VerifyEmail from './pages/VerifyEmail';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import ProtectedRoute from './routes/ProtectedRoute';
+import OrganizationList from './pages/organizations/OrganizationList';
+import OrganizationDetail from './pages/organizations/OrganizationDetail';
+import Invitations from './pages/organizations/Invitations';
 
 function App() {
   return (
@@ -15,11 +20,37 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route
             path="/dashboard"
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/organizations"
+            element={
+              <ProtectedRoute>
+                <OrganizationList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/organizations/:organizationId"
+            element={
+              <ProtectedRoute>
+                <OrganizationDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/invitations"
+            element={
+              <ProtectedRoute>
+                <Invitations />
               </ProtectedRoute>
             }
           />

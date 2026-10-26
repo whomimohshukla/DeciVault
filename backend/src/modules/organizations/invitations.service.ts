@@ -158,7 +158,7 @@ export async function declineInvitation(token: string, userId: string) {
   return { success: true };
 }
 
-export async function cancelInvitation(organizationId: string, invitationId: string) {
+export async function cancelInvitation(_organizationId: string, invitationId: string) {
   await prisma.invitation.delete({
     where: { id: invitationId },
   });

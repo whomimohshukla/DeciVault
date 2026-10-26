@@ -24,7 +24,7 @@ export async function invite(req: AuthRequest, res: Response) {
       });
     }
 
-    const result = await createInvitation(req.params.organizationId, req.userId, {
+    const result = await createInvitation((req.params.organizationId as string), req.userId, {
       email: parsed.data.email,
       role: parsed.data.role,
     });
@@ -47,7 +47,7 @@ export async function invite(req: AuthRequest, res: Response) {
 
 export async function list(req: AuthRequest, res: Response) {
   try {
-    const invitations = await listInvitations(req.params.organizationId);
+    const invitations = await listInvitations((req.params.organizationId as string));
     return res.status(200).json({ status: 'success', data: { invitations } });
   } catch {
     return res.status(500).json({ status: 'error', message: 'Failed to list invitations' });
@@ -60,7 +60,7 @@ export async function accept(req: AuthRequest, res: Response) {
       return res.status(401).json({ status: 'error', message: 'Unauthorized' });
     }
 
-    await acceptInvitation(req.params.token, req.userId);
+    await acceptInvitation((req.params.token as string), req.userId);
     return res.status(200).json({ status: 'success', message: 'Invitation accepted' });
   } catch (error: any) {
     if (
@@ -82,7 +82,7 @@ export async function decline(req: AuthRequest, res: Response) {
       return res.status(401).json({ status: 'error', message: 'Unauthorized' });
     }
 
-    await declineInvitation(req.params.token, req.userId);
+    await declineInvitation((req.params.token as string), req.userId);
     return res.status(200).json({ status: 'success', message: 'Invitation declined' });
   } catch (error: any) {
     if (
@@ -97,7 +97,7 @@ export async function decline(req: AuthRequest, res: Response) {
 
 export async function cancel(req: AuthRequest, res: Response) {
   try {
-    await cancelInvitation(req.params.organizationId, req.params.invitationId);
+    await cancelInvitation((req.params.organizationId as string), (req.params.invitationId as string));
     return res.status(200).json({ status: 'success', message: 'Invitation cancelled' });
   } catch {
     return res.status(500).json({ status: 'error', message: 'Failed to cancel invitation' });

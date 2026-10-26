@@ -238,3 +238,88 @@ export async function resendVerification(userId: string) {
 
   return { success: true };
 }
+
+export async function forgotPassword(email: string) {
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (!user) {
+    // Don't reveal if user exists
+    return { success: true };
+  }
+
+  await prisma.passwordResetToken.updateMany({
+    where: { userId: user.id, used: false },
+    data: { used: true },
+  });
+
+  const token = generateVerificationToken();
+  const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+  await prisma.passwordResetToken.create({
+    data: {
+      token,
+      userId: user.id,
+      expiresAt,
+    },
+  });
+
+  const resetUrl = `${env.APP_URL}/reset-password?token=${token}`;
+  console.log('\n========== PASSWORD RESET ==========');
+  console.log('To:', user.email);
+  console.log('Reset URL:', resetUrl);
+  console.log('Token:', token);
+  console.log('=====================================\n');
+
+  try {
+    await emailQueue.add('send-password-reset', {
+      to: user.email,
+      subject: 'Reset your DeciVault password',
+      html: `
+        <h2>Reset your password</h2>
+        <p>Click the link below to reset your password:</p>
+        <a href="${resetUrl}">${resetUrl}</a>
+        <p>This link expires in 1 hour.</p>
+      `,
+    });
+  } catch {
+    // Skip if queue unavailable
+  }
+
+  return { success: true };
+}
+
+export async function resetPassword(token: string, newPassword: string) {
+  const record = await prisma.passwordResetToken.findUnique({
+    where: { token },
+    include: { user: true },
+  });
+
+  if (!record) {
+    throw new Error('Invalid reset token');
+  }
+
+  if (record.used) {
+    throw new Error('Token already used');
+  }
+
+  if (record.expiresAt < new Date()) {
+    throw new Error('Token expired');
+  }
+
+  const passwordHash = await hashPassword(newPassword);
+
+  await prisma.$transaction([
+    prisma.passwordResetToken.update({
+      where: { id: record.id },
+      data: { used: true },
+    }),
+    prisma.user.update({
+      where: { id: record.userId },
+      data: { passwordHash },
+    }),
+  ]);
+
+  return { success: true };
+}

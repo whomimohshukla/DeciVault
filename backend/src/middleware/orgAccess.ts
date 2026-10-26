@@ -14,7 +14,7 @@ export async function requireOrgMember(
       return;
     }
 
-    const organizationId = req.params.organizationId;
+    const organizationId = req.params.organizationId as string;
     if (!organizationId) {
       res.status(400).json({ status: 'error', message: 'Organization ID required' });
       return;

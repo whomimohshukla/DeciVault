@@ -57,3 +57,13 @@ export async function resendVerification() {
   const response = await apiClient.post('/auth/resend-verification');
   return response.data;
 }
+
+export async function forgotPassword(email: string) {
+  const response = await apiClient.post('/auth/forgot-password', { email });
+  return response.data;
+}
+
+export async function resetPassword(token: string, password: string) {
+  const response = await apiClient.post('/auth/reset-password', { token, password });
+  return response.data;
+}

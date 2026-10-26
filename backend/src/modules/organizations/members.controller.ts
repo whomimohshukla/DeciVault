@@ -5,7 +5,7 @@ import { listMembers, updateMemberRole, removeMember, leaveOrganization } from '
 
 export async function list(req: AuthRequest, res: Response) {
   try {
-    const members = await listMembers(req.params.organizationId);
+    const members = await listMembers((req.params.organizationId as string));
     return res.status(200).json({ status: 'success', data: { members } });
   } catch {
     return res.status(500).json({ status: 'error', message: 'Failed to list members' });
@@ -28,8 +28,8 @@ export async function updateRole(req: AuthRequest, res: Response) {
     }
 
     const member = await updateMemberRole(
-      req.params.organizationId,
-      req.params.userId,
+      (req.params.organizationId as string),
+      (req.params.userId as string),
       parsed.data.role,
       req.userId
     );
@@ -55,7 +55,7 @@ export async function remove(req: AuthRequest, res: Response) {
       return res.status(401).json({ status: 'error', message: 'Unauthorized' });
     }
 
-    await removeMember(req.params.organizationId, req.params.userId, req.userId);
+    await removeMember((req.params.organizationId as string), (req.params.userId as string), req.userId);
     return res.status(200).json({ status: 'success', message: 'Member removed' });
   } catch (error: any) {
     if (error.message === 'Only owners can remove members' || error.message === 'Cannot remove the owner') {
@@ -74,7 +74,7 @@ export async function leave(req: AuthRequest, res: Response) {
       return res.status(401).json({ status: 'error', message: 'Unauthorized' });
     }
 
-    await leaveOrganization(req.params.organizationId, req.userId);
+    await leaveOrganization((req.params.organizationId as string), req.userId);
     return res.status(200).json({ status: 'success', message: 'Left organization' });
   } catch (error: any) {
     if (error.message === 'Cannot leave as the last owner') {

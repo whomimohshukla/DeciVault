@@ -1,11 +1,13 @@
 import { Request, Response } from 'express';
-import { registerSchema, loginSchema } from '../../validators/auth.js';
+import { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } from '../../validators/auth.js';
 import {
   createUser,
   validateUser,
   getUserById,
   verifyEmailToken,
   resendVerification,
+  forgotPassword,
+  resetPassword,
 } from './auth.service.js';
 import { signToken } from '../../utils/auth.js';
 import { AuthRequest } from '../../middleware/auth.js';
@@ -140,8 +142,6 @@ export async function verifyEmail(req: Request, res: Response) {
 
     await verifyEmailToken(token);
 
-    // console.log(`Email verified successfully for token: ${token}`);
-
     return res.status(200).json({
       status: 'success',
       message: 'Email verified successfully',
@@ -188,6 +188,69 @@ export async function resendVerificationEmail(req: AuthRequest, res: Response) {
     return res.status(500).json({
       status: 'error',
       message: 'Failed to resend verification email',
+    });
+  }
+}
+
+export async function forgotPasswordHandler(req: Request, res: Response) {
+  try {
+    const parsed = forgotPasswordSchema.safeParse(req.body);
+
+    if (!parsed.success) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Validation failed',
+        errors: parsed.error.flatten(),
+      });
+    }
+
+    await forgotPassword(parsed.data.email);
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'If an account exists, a password reset link has been sent',
+    });
+  } catch {
+    return res.status(200).json({
+      status: 'success',
+      message: 'If an account exists, a password reset link has been sent',
+    });
+  }
+}
+
+export async function resetPasswordHandler(req: Request, res: Response) {
+  try {
+    const parsed = resetPasswordSchema.safeParse(req.body);
+
+    if (!parsed.success) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Validation failed',
+        errors: parsed.error.flatten(),
+      });
+    }
+
+    await resetPassword(parsed.data.token, parsed.data.password);
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Password reset successfully',
+    });
+  } catch (error: any) {
+    if (
+      error.message === 'Invalid reset token' ||
+      error.message === 'Token already used' ||
+      error.message === 'Token expired'
+    ) {
+      return res.status(400).json({
+        status: 'error',
+        message: error.message,
+      });
+    }
+
+    return res.status(500).json({
+      status: 'error',
+      message: 'Password reset failed',
     });
   }
 }
