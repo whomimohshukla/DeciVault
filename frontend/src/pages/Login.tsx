@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { login } from '../services/auth';
 import { useAuth } from '../context/AuthContext';
-import ChaiNavbar from '../components/layout/ChaiNavbar';
-import { Footer } from '../components/footer';
-import { Mail, Lock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -31,64 +32,64 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden flex flex-col">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(251,146,60,0.08)_0%,transparent_60%)] pointer-events-none" />
-      <ChaiNavbar />
-      <main className="relative flex-1 max-w-6xl mx-auto px-6 sm:px-12 pt-32 pb-16 flex items-center justify-center w-full">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <h1 className="text-2xl sm:text-3xl font-medium mb-2">Welcome back</h1>
-            <p className="text-muted-foreground">Sign in to your <span className="highlight">DeciVault</span> account</p>
+    <div className="min-h-screen bg-background flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-6">
+        <div className="text-center">
+          <div className="flex justify-center mb-4">
+            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+              <span className="text-primary-foreground font-semibold text-sm">DV</span>
+            </div>
           </div>
-          <form onSubmit={handleSubmit} className="card-chai p-6 sm:p-8 space-y-4 shadow-lg shadow-black/5">
-            {error && <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-3 rounded-lg text-sm">{error}</div>}
-            <div className="space-y-3">
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <input
+          <h1 className="text-2xl font-semibold tracking-tight">Sign in to DeciVault</h1>
+          <p className="text-muted-foreground mt-2">Enter your credentials to access your account</p>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Login</CardTitle>
+            <CardDescription>Welcome back</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
+                  {error}
+                </div>
+              )}
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
                   type="email"
-                  required
-                  className="w-full pl-10 pr-3 py-2.5 bg-transparent border border-border rounded-lg focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20 transition-all"
-                  placeholder="Email address"
+                  placeholder="name@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  required
                 />
               </div>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <input
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
                   type="password"
-                  required
-                  className="w-full pl-10 pr-3 py-2.5 bg-transparent border border-border rounded-lg focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20 transition-all"
-                  placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  required
                 />
               </div>
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-asym w-full py-2.5 px-4 bg-white text-black hover:bg-neutral-200 disabled:opacity-50 transition-all font-medium"
-            >
-              {loading ? 'Signing in...' : 'Sign in'}
-            </button>
-            <div className="text-center space-y-2 text-sm">
-              <div>
-                <Link to="/forgot-password" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Forgot Password?
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? 'Signing in...' : 'Sign in'}
+              </Button>
+              <div className="text-center text-sm">
+                <span className="text-muted-foreground">Don't have an account? </span>
+                <Link to="/register" className="text-primary hover:underline">
+                  Sign up
                 </Link>
               </div>
-              <div>
-                <Link to="/register" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Don't have an account? <span className="highlight">Create one</span>
-                </Link>
-              </div>
-            </div>
-          </form>
-        </div>
-      </main>
-      <Footer />
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

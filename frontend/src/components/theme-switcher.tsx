@@ -8,9 +8,10 @@ export function ThemeSwitcher() {
     const stored = localStorage.getItem('decivault-theme') as 'dark' | 'light' | null;
     if (stored) {
       setTheme(stored);
-      document.documentElement.classList.toggle('dark', stored === 'dark');
-      document.documentElement.classList.toggle('light', stored === 'light');
+      document.documentElement.classList.remove('dark', 'light');
+      document.documentElement.classList.add(stored);
     } else {
+      document.documentElement.classList.remove('light');
       document.documentElement.classList.add('dark');
     }
   }, []);

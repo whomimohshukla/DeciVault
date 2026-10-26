@@ -1,8 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { listProjects, createProject } from '../../services/projects';
-import ChaiNavbar from '../../components/layout/ChaiNavbar';
-import { Footer } from '../../components/footer';
+import AppLayout from '../../components/layout/AppLayout';
+import Card from '../../components/ui/Card';
+import Button from '../../components/ui/Button';
+import Input from '../../components/ui/Input';
+import { Badge } from '@/components/ui/badge';
+import EmptyState from '../../components/shared/EmptyState';
+import LoadingSkeleton from '../../components/shared/LoadingSkeleton';
+import { FolderKanban, Plus, ArrowLeft } from 'lucide-react';
 
 export default function ProjectList() {
   const { organizationId } = useParams<{ organizationId: string }>();
@@ -12,6 +18,7 @@ export default function ProjectList() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [creating, setCreating] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(false);
 
   const load = async () => {
     if (!organizationId) return;
@@ -38,6 +45,7 @@ export default function ProjectList() {
       await createProject(organizationId, { name, description });
       setName('');
       setDescription('');
+      setShowCreateForm(false);
       load();
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to create project');
@@ -46,61 +54,126 @@ export default function ProjectList() {
     }
   };
 
-  if (loading) return (
-    <div className="min-h-screen bg-background">
-      <ChaiNavbar />
-      <main className="pt-32 px-6 max-w-4xl mx-auto text-foreground">Loading...</main>
-    </div>
-  );
+  const getStatusVariant = (status: string) => {
+    if (status === 'ACTIVE') return 'success';
+    if (status === 'ON_HOLD') return 'warning';
+    if (status === 'ARCHIVED') return 'gray';
+    return 'gray';
+  };
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden flex flex-col">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(251,146,60,0.08)_0%,transparent_60%)] pointer-events-none" />
-      <ChaiNavbar />
-      <main className="relative flex-1 max-w-4xl mx-auto px-6 sm:px-12 pt-32 pb-16 w-full">
-        <div className="mb-6">
-          <Link to={`/organizations/${organizationId}`} className="text-muted-foreground hover:text-foreground text-sm">← Back to Organization</Link>
+    <AppLayout>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Link to={`/organizations/${organizationId}`}>
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="w-4 h-4" />
+                Back to Organization
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-2xl font-semibold text-text-primary">Projects</h1>
+              <p className="text-text-secondary mt-1">
+                Manage projects in this organization
+              </p>
+            </div>
+          </div>
+          <Button onClick={() => setShowCreateForm(!showCreateForm)}>
+            <Plus className="w-4 h-4" />
+            New Project
+          </Button>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-medium mb-6">Projects</h1>
-        {error && <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-3 rounded mb-4">{error}</div>}
-        <form onSubmit={handleCreate} className="card-chai p-4 mb-6 space-y-2">
-          <h2 className="font-semibold">Create Project</h2>
-          <input
-            className="w-full px-3 py-2 bg-transparent border border-border rounded"
-            placeholder="Project name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-          <textarea
-            className="w-full px-3 py-2 bg-transparent border border-border rounded"
-            placeholder="Description (optional)"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-          <button disabled={creating} className="px-4 py-2 bg-white text-black rounded">
-            {creating ? 'Creating...' : 'Create'}
-          </button>
-        </form>
-        {projects.length === 0 ? (
-          <p className="text-muted-foreground">No projects yet.</p>
+
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-800">{error}</p>
+          </div>
+        )}
+
+        {/* Create Form */}
+        {showCreateForm && (
+          <Card>
+            <h2 className="text-lg font-semibold text-text-primary mb-4">Create New Project</h2>
+            <form onSubmit={handleCreate} className="space-y-4">
+              <Input
+                label="Project Name"
+                placeholder="Enter project name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-1.5">
+                  Description
+                </label>
+                <textarea
+                  className="w-full px-3 py-2 bg-white border border-border rounded-lg text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                  placeholder="Enter project description (optional)"
+                  rows={3}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-3">
+                <Button type="submit" loading={creating}>
+                  Create Project
+                </Button>
+                <Button type="button" variant="secondary" onClick={() => setShowCreateForm(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </Card>
+        )}
+
+        {/* Projects List */}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <Card key={i}>
+                <LoadingSkeleton className="h-6 w-32 mb-2" />
+                <LoadingSkeleton className="h-4 w-full mb-2" />
+                <LoadingSkeleton className="h-4 w-24" />
+              </Card>
+            ))}
+          </div>
+        ) : projects.length === 0 ? (
+          <Card>
+            <EmptyState
+              icon={FolderKanban}
+              title="No projects yet"
+              description="Create your first project to get started."
+              action={
+                <Button onClick={() => setShowCreateForm(true)}>
+                  <Plus className="w-4 h-4" />
+                  Create Project
+                </Button>
+              }
+            />
+          </Card>
         ) : (
-          <div className="space-y-2">
-            {projects.map((p) => (
-              <Link
-                key={p.id}
-                to={`/organizations/${organizationId}/projects/${p.id}`}
-                className="block card-chai p-4 hover:opacity-100"
-              >
-                <div className="font-semibold">{p.name}</div>
-                {p.description && <div className="text-sm text-muted-foreground">{p.description}</div>}
-                <div className="text-xs text-muted-foreground mt-1">Status: {p.status}</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {projects.map((project) => (
+              <Link key={project.id} to={`/organizations/${organizationId}/projects/${project.id}`}>
+                <Card hover className="h-full cursor-pointer">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <FolderKanban className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <Badge variant={getStatusVariant(project.status)}>{project.status}</Badge>
+                  </div>
+                  <h3 className="text-lg font-semibold text-text-primary mb-2">{project.name}</h3>
+                  <p className="text-sm text-text-secondary line-clamp-2">
+                    {project.description || 'No description provided'}
+                  </p>
+                </Card>
               </Link>
             ))}
           </div>
         )}
-      </main>
-      <Footer />
-    </div>
+      </div>
+    </AppLayout>
   );
 }

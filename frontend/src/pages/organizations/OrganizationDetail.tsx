@@ -2,9 +2,16 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getOrganization, listMembers, inviteMember, updateMemberRole, removeMember, leaveOrganization } from '../../services/organizations';
 import { useAuth } from '../../context/AuthContext';
+import AppLayout from '../../components/layout/AppLayout';
+import Card from '../../components/ui/Card';
+import Button from '../../components/ui/Button';
+import Input from '../../components/ui/Input';
+import { Badge } from '@/components/ui/badge';
+import LoadingSkeleton from '../../components/shared/LoadingSkeleton';
+import { Users, Mail, FolderKanban, ArrowLeft, Plus } from 'lucide-react';
 
 export default function OrganizationDetail() {
-  const { organizationId } = useParams();
+  const { organizationId } = useParams<{ organizationId: string }>();
   const { user } = useAuth();
   const [org, setOrg] = useState<any>(null);
   const [members, setMembers] = useState<any[]>([]);
@@ -12,7 +19,7 @@ export default function OrganizationDetail() {
   const [error, setError] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('MEMBER');
-  const [inviteMsg, setInviteMsg] = useState('');
+  const [inviting, setInviting] = useState(false);
 
   const load = async () => {
     try {
@@ -23,7 +30,7 @@ export default function OrganizationDetail() {
       setOrg(orgRes.data.organization);
       setMembers(memRes.data.members || []);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to load');
+      setError(err.response?.data?.message || 'Failed to load organization');
     } finally {
       setLoading(false);
     }
@@ -33,21 +40,18 @@ export default function OrganizationDetail() {
     load();
   }, [organizationId]);
 
-  const myRole = members.find((m) => m.userId === user?.id)?.role;
-  const isOwner = myRole === 'OWNER';
-  const isAdminOrOwner = isOwner || myRole === 'ADMIN';
-
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
-    setInviteMsg('');
     setError('');
+    setInviting(true);
     try {
-      const res = await inviteMember(organizationId!, { email: inviteEmail, role: inviteRole });
-      setInviteMsg(res.data?.token ? `Invitation sent. Token (dev): ${res.data.token}` : 'Invitation sent');
+      await inviteMember(organizationId!, { email: inviteEmail, role: inviteRole });
       setInviteEmail('');
       load();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to invite');
+      setError(err.response?.data?.message || 'Failed to invite member');
+    } finally {
+      setInviting(false);
     }
   };
 
@@ -61,88 +65,176 @@ export default function OrganizationDetail() {
   };
 
   const handleRemove = async (userId: string) => {
-    if (!confirm('Remove this member?')) return;
+    if (!confirm('Remove this member from the organization?')) return;
     try {
       await removeMember(organizationId!, userId);
       load();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to remove');
+      setError(err.response?.data?.message || 'Failed to remove member');
     }
   };
 
   const handleLeave = async () => {
-    if (!confirm('Leave this organization?')) return;
+    if (!confirm('Are you sure you want to leave this organization?')) return;
     try {
       await leaveOrganization(organizationId!);
       window.location.href = '/organizations';
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to leave');
+      setError(err.response?.data?.message || 'Failed to leave organization');
     }
   };
 
-  if (loading) return <div className="p-8">Loading...</div>;
-  if (!org) return <div className="p-8">Not found</div>;
+  if (loading) {
+    return (
+      <AppLayout>
+        <div className="space-y-6">
+          <LoadingSkeleton className="h-8 w-48" />
+          <LoadingSkeleton className="h-32 w-full" />
+          <LoadingSkeleton className="h-64 w-full" />
+        </div>
+      </AppLayout>
+    );
+  }
+
+  const myMembership = members.find((m: any) => m.user?.id === user?.id);
+  const canManage = myMembership?.role === 'OWNER' || myMembership?.role === 'ADMIN';
+  const isOwner = myMembership?.role === 'OWNER';
+
+  const getRoleBadgeVariant = (role: string) => {
+    if (role === 'OWNER') return 'danger';
+    if (role === 'ADMIN') return 'warning';
+    if (role === 'MEMBER') return 'info';
+    return 'gray';
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-4">
-          <Link to="/organizations" className="text-blue-600 hover:underline">← Back to organizations</Link>
+    <AppLayout>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Link to="/organizations">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="w-4 h-4" />
+                Back
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-2xl font-semibold text-text-primary">{org?.name}</h1>
+              <p className="text-text-secondary mt-1">{org?.slug}</p>
+            </div>
+          </div>
+          <Link to={`/organizations/${organizationId}/projects`}>
+            <Button>
+              <FolderKanban className="w-4 h-4" />
+              View Projects
+            </Button>
+          </Link>
         </div>
-        <h1 className="text-3xl font-bold mb-2">{org.name}</h1>
-        <p className="text-gray-600 mb-6">{org.slug} • Your role: {myRole}</p>
-        {error && <div className="bg-red-50 text-red-500 p-3 rounded mb-4">{error}</div>}
-        {isAdminOrOwner && (
-          <form onSubmit={handleInvite} className="bg-white p-4 rounded shadow mb-6 space-y-2">
-            <h2 className="font-semibold">Invite Member</h2>
-            {inviteMsg && <div className="bg-green-50 text-green-700 p-2 rounded text-sm break-all">{inviteMsg}</div>}
-            <input
-              type="email"
-              className="w-full px-3 py-2 border rounded"
-              placeholder="Email"
-              value={inviteEmail}
-              onChange={(e) => setInviteEmail(e.target.value)}
-              required
-            />
-            <select className="px-3 py-2 border rounded" value={inviteRole} onChange={(e) => setInviteRole(e.target.value)}>
-              <option value="ADMIN">ADMIN</option>
-              <option value="MEMBER">MEMBER</option>
-              <option value="VIEWER">VIEWER</option>
-            </select>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded">Invite</button>
-          </form>
+
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-800">{error}</p>
+          </div>
         )}
-        <div className="bg-white p-4 rounded shadow mb-6">
-          <h2 className="font-semibold mb-4">Members</h2>
-          <div className="space-y-2">
-            {members.map((m) => (
-              <div key={m.id} className="flex justify-between items-center border-b pb-2">
-                <div>
-                  <div>{m.user.firstName || m.user.lastName ? `${m.user.firstName || ''} ${m.user.lastName || ''}`.trim() : m.user.email}</div>
-                  <div className="text-sm text-gray-600">{m.user.email} • {m.role}</div>
+
+        {/* Invite Section */}
+        {canManage && (
+          <Card>
+            <div className="flex items-center gap-2 mb-4">
+              <Mail className="w-5 h-5 text-brand-primary" />
+              <h2 className="text-lg font-semibold text-text-primary">Invite Members</h2>
+            </div>
+            <form onSubmit={handleInvite} className="flex flex-col sm:flex-row gap-3">
+              <div className="flex-1">
+                <Input
+                  placeholder="Enter email address"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                  type="email"
+                  required
+                />
+              </div>
+              <select
+                className="px-3 py-2 bg-white border border-border rounded-lg text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                value={inviteRole}
+                onChange={(e) => setInviteRole(e.target.value)}
+              >
+                <option value="MEMBER">Member</option>
+                <option value="ADMIN">Admin</option>
+                <option value="VIEWER">Viewer</option>
+              </select>
+              <Button type="submit" loading={inviting}>
+                <Plus className="w-4 h-4" />
+                Send Invite
+              </Button>
+            </form>
+          </Card>
+        )}
+
+        {/* Members Section */}
+        <Card>
+          <div className="flex items-center gap-2 mb-6">
+            <Users className="w-5 h-5 text-brand-primary" />
+            <h2 className="text-lg font-semibold text-text-primary">Team Members</h2>
+            <Badge variant="gray">{members.length}</Badge>
+          </div>
+          <div className="space-y-3">
+            {members.map((member: any) => (
+              <div key={member.id} className="flex items-center justify-between p-3 border border-border rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-brand-primary rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm font-medium">
+                      {member.user?.firstName?.[0] || member.user?.email?.[0]?.toUpperCase() || 'U'}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="font-medium text-text-primary">
+                      {member.user?.firstName && member.user?.lastName 
+                        ? `${member.user.firstName} ${member.user.lastName}`
+                        : member.user?.firstName || 'Unknown User'}
+                    </p>
+                    <p className="text-sm text-text-secondary">{member.user?.email}</p>
+                  </div>
                 </div>
-                <div className="space-x-2">
-                  {isOwner && m.userId !== user?.id && m.role !== 'OWNER' && (
-                    <>
-                      <select value={m.role} onChange={(e) => handleRoleChange(m.userId, e.target.value)} className="px-2 py-1 border rounded">
-                        <option value="ADMIN">ADMIN</option>
-                        <option value="MEMBER">MEMBER</option>
-                        <option value="VIEWER">VIEWER</option>
+                <div className="flex items-center gap-3">
+                  <Badge variant={getRoleBadgeVariant(member.role)}>{member.role}</Badge>
+                  {isOwner && member.user?.id !== user?.id && (
+                    <div className="flex items-center gap-2">
+                      <select
+                        className="px-2 py-1 bg-white border border-border rounded text-xs text-text-primary focus:outline-none focus:ring-1 focus:ring-brand-primary"
+                        value={member.role}
+                        onChange={(e) => handleRoleChange(member.user?.id, e.target.value)}
+                      >
+                        <option value="MEMBER">Member</option>
+                        <option value="ADMIN">Admin</option>
+                        <option value="VIEWER">Viewer</option>
+                        <option value="OWNER">Owner</option>
                       </select>
-                      <button onClick={() => handleRemove(m.userId)} className="px-2 py-1 bg-red-600 text-white rounded">Remove</button>
-                    </>
+                      <Button variant="ghost" size="sm" onClick={() => handleRemove(member.user?.id)}>
+                        Remove
+                      </Button>
+                    </div>
                   )}
                 </div>
               </div>
             ))}
           </div>
-        </div>
-        {myRole !== 'OWNER' && (
-          <button onClick={handleLeave} className="px-4 py-2 bg-red-600 text-white rounded">Leave Organization</button>
-        )}
+        </Card>
+
+        {/* Actions */}
+        <Card>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-medium text-text-primary">Leave Organization</h3>
+              <p className="text-sm text-text-secondary mt-1">Remove yourself from this organization</p>
+            </div>
+            <Button variant="destructive" onClick={handleLeave}>
+              Leave Organization
+            </Button>
+          </div>
+        </Card>
       </div>
-    </div>
+    </AppLayout>
   );
 }
-
-import { Link } from 'react-router-dom';

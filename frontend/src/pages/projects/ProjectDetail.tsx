@@ -1,8 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getProject, updateProject, deleteProject } from '../../services/projects';
-import ChaiNavbar from '../../components/layout/ChaiNavbar';
-import { Footer } from '../../components/footer';
+import AppLayout from '../../components/layout/AppLayout';
+import Card from '../../components/ui/Card';
+import Button from '../../components/ui/Button';
+import Input from '../../components/ui/Input';
+import { Badge } from '@/components/ui/badge';
+import LoadingSkeleton from '../../components/shared/LoadingSkeleton';
+import { ArrowLeft, Edit, Trash2, Calendar, User } from 'lucide-react';
 
 export default function ProjectDetail() {
   const { organizationId, projectId } = useParams<{ organizationId: string; projectId: string }>();
@@ -55,7 +60,7 @@ export default function ProjectDetail() {
 
   const handleDelete = async () => {
     if (!organizationId || !projectId) return;
-    if (!confirm('Delete this project?')) return;
+    if (!confirm('Are you sure you want to delete this project? This action cannot be undone.')) return;
     setDeleting(true);
     setError('');
     try {
@@ -67,83 +72,165 @@ export default function ProjectDetail() {
     }
   };
 
-  if (loading) return (
-    <div className="min-h-screen bg-background">
-      <ChaiNavbar />
-      <main className="pt-32 px-6 max-w-4xl mx-auto text-foreground">Loading...</main>
-    </div>
-  );
+  const getStatusVariant = (status: string) => {
+    if (status === 'ACTIVE') return 'success';
+    if (status === 'ON_HOLD') return 'warning';
+    if (status === 'ARCHIVED') return 'gray';
+    return 'gray';
+  };
 
-  if (!project) return (
-    <div className="min-h-screen bg-background">
-      <ChaiNavbar />
-      <main className="pt-32 px-6 max-w-4xl mx-auto text-foreground">Project not found</main>
-    </div>
-  );
+  if (loading) {
+    return (
+      <AppLayout>
+        <div className="space-y-6">
+          <LoadingSkeleton className="h-8 w-48" />
+          <LoadingSkeleton className="h-64 w-full" />
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (!project) {
+    return (
+      <AppLayout>
+        <div className="text-center py-12">
+          <h2 className="text-xl font-semibold text-text-primary mb-2">Project not found</h2>
+          <p className="text-text-secondary mb-4">The project you're looking for doesn't exist or you don't have access to it.</p>
+          <Link to={`/organizations/${organizationId}/projects`}>
+            <Button>Back to Projects</Button>
+          </Link>
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden flex flex-col">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(251,146,60,0.08)_0%,transparent_60%)] pointer-events-none" />
-      <ChaiNavbar />
-      <main className="relative flex-1 max-w-4xl mx-auto px-6 sm:px-12 pt-32 pb-16 w-full">
-        <div className="mb-6">
-          <Link to={`/organizations/${organizationId}/projects`} className="text-muted-foreground hover:text-foreground text-sm">← Back to Projects</Link>
-        </div>
-        <h1 className="text-2xl sm:text-3xl font-medium mb-6">{project.name}</h1>
-        {error && <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-3 rounded mb-4">{error}</div>}
-        {!editing ? (
-          <div className="card-chai p-6 space-y-3">
+    <AppLayout>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Link to={`/organizations/${organizationId}/projects`}>
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="w-4 h-4" />
+                Back to Projects
+              </Button>
+            </Link>
             <div>
-              <div className="text-muted-foreground text-sm">Description</div>
-              <div>{project.description || 'No description'}</div>
-            </div>
-            <div>
-              <div className="text-muted-foreground text-sm">Status</div>
-              <div>{project.status}</div>
-            </div>
-            <div>
-              <div className="text-muted-foreground text-sm">Created By</div>
-              <div>{project.createdBy?.firstName || project.createdBy?.email}</div>
-            </div>
-            <div className="flex gap-2 pt-2">
-              <button onClick={() => setEditing(true)} className="px-4 py-2 bg-white text-black rounded">Edit</button>
-              <button onClick={handleDelete} disabled={deleting} className="px-4 py-2 border border-red-500/40 text-red-400 rounded">
-                {deleting ? 'Deleting...' : 'Delete'}
-              </button>
+              <h1 className="text-2xl font-semibold text-text-primary">{project.name}</h1>
+              <div className="flex items-center gap-2 mt-1">
+                <Badge variant={getStatusVariant(project.status)}>{project.status}</Badge>
+              </div>
             </div>
           </div>
-        ) : (
-          <form onSubmit={handleSave} className="card-chai p-6 space-y-3">
-            <input
-              className="w-full px-3 py-2 bg-transparent border border-border rounded"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-            <textarea
-              className="w-full px-3 py-2 bg-transparent border border-border rounded"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-            <select
-              className="px-3 py-2 bg-transparent border border-border rounded"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-            >
-              <option value="ACTIVE">ACTIVE</option>
-              <option value="ON_HOLD">ON_HOLD</option>
-              <option value="ARCHIVED">ARCHIVED</option>
-            </select>
+          {!editing && (
             <div className="flex gap-2">
-              <button disabled={saving} className="px-4 py-2 bg-white text-black rounded">
-                {saving ? 'Saving...' : 'Save'}
-              </button>
-              <button type="button" onClick={() => setEditing(false)} className="px-4 py-2 border border-border rounded">Cancel</button>
+              <Button variant="secondary" onClick={() => setEditing(true)}>
+                <Edit className="w-4 h-4" />
+                Edit
+              </Button>
+              <Button variant="destructive" onClick={handleDelete} loading={deleting}>
+                <Trash2 className="w-4 h-4" />
+                Delete
+              </Button>
             </div>
-          </form>
+          )}
+        </div>
+
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-800">{error}</p>
+          </div>
         )}
-      </main>
-      <Footer />
-    </div>
+
+        {editing ? (
+          <Card>
+            <h2 className="text-lg font-semibold text-text-primary mb-4">Edit Project</h2>
+            <form onSubmit={handleSave} className="space-y-4">
+              <Input
+                label="Project Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-1.5">
+                  Description
+                </label>
+                <textarea
+                  className="w-full px-3 py-2 bg-white border border-border rounded-lg text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                  rows={4}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-1.5">
+                  Status
+                </label>
+                <select
+                  className="px-3 py-2 bg-white border border-border rounded-lg text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                >
+                  <option value="ACTIVE">Active</option>
+                  <option value="ON_HOLD">On Hold</option>
+                  <option value="ARCHIVED">Archived</option>
+                </select>
+              </div>
+              <div className="flex gap-3">
+                <Button type="submit" loading={saving}>
+                  Save Changes
+                </Button>
+                <Button type="button" variant="secondary" onClick={() => setEditing(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <Card>
+                <h2 className="text-lg font-semibold text-text-primary mb-4">Project Details</h2>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-text-secondary">Description</label>
+                    <p className="text-text-primary mt-1">
+                      {project.description || 'No description provided'}
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            </div>
+            <div>
+              <Card>
+                <h2 className="text-lg font-semibold text-text-primary mb-4">Information</h2>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-4 h-4 text-text-secondary" />
+                    <div>
+                      <p className="text-xs text-text-secondary">Created</p>
+                      <p className="text-sm text-text-primary">
+                        {new Date(project.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <User className="w-4 h-4 text-text-secondary" />
+                    <div>
+                      <p className="text-xs text-text-secondary">Created By</p>
+                      <p className="text-sm text-text-primary">
+                        {project.createdBy?.firstName || project.createdBy?.email}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </div>
+        )}
+      </div>
+    </AppLayout>
   );
 }
