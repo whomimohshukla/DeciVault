@@ -33,3 +33,5 @@ export function ThemeSwitcher() {
     </button>
   );
 }
+
+export default ThemeSwitcher;
