@@ -206,3 +206,5 @@ decivault/
 See [docs/architecture.md](docs/architecture.md) for detailed architecture information.
 
 # DeciVault
+
+
