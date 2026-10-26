@@ -4,6 +4,13 @@ import { requireOrgMember, requireOrgRole } from '../middleware/orgAccess.js';
 import { create, list, get, update, remove } from '../modules/organizations/organizations.controller.js';
 import { list as listMembers, updateRole, remove as removeMember, leave } from '../modules/organizations/members.controller.js';
 import { invite, list as listInvitations, accept, decline, cancel } from '../modules/organizations/invitations.controller.js';
+import {
+  create as createProject,
+  list as listProjects,
+  get as getProject,
+  update as updateProject,
+  remove as removeProject,
+} from '../modules/projects/projects.controller.js';
 
 const router = Router();
 
@@ -26,5 +33,12 @@ router.post('/:organizationId/leave', requireAuth, requireOrgMember, leave);
 router.post('/:organizationId/invitations', requireAuth, requireOrgMember, requireOrgRole(['OWNER', 'ADMIN']), invite);
 router.get('/:organizationId/invitations', requireAuth, requireOrgMember, requireOrgRole(['OWNER', 'ADMIN']), listInvitations);
 router.delete('/:organizationId/invitations/:invitationId', requireAuth, requireOrgMember, requireOrgRole(['OWNER', 'ADMIN']), cancel);
+
+// Projects
+router.post('/:organizationId/projects', requireAuth, requireOrgMember, requireOrgRole(['OWNER', 'ADMIN', 'MEMBER']), createProject);
+router.get('/:organizationId/projects', requireAuth, requireOrgMember, listProjects);
+router.get('/:organizationId/projects/:projectId', requireAuth, requireOrgMember, getProject);
+router.patch('/:organizationId/projects/:projectId', requireAuth, requireOrgMember, requireOrgRole(['OWNER', 'ADMIN', 'MEMBER']), updateProject);
+router.delete('/:organizationId/projects/:projectId', requireAuth, requireOrgMember, requireOrgRole(['OWNER', 'ADMIN']), removeProject);
 
 export default router;

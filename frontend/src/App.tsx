@@ -11,6 +11,8 @@ import ProtectedRoute from './routes/ProtectedRoute';
 import OrganizationList from './pages/organizations/OrganizationList';
 import OrganizationDetail from './pages/organizations/OrganizationDetail';
 import Invitations from './pages/organizations/Invitations';
+import ProjectList from './pages/projects/ProjectList';
+import ProjectDetail from './pages/projects/ProjectDetail';
 
 function App() {
   return (
@@ -52,6 +54,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <Invitations />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/organizations/:organizationId/projects"
+            element={
+              <ProtectedRoute>
+                <ProjectList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/organizations/:organizationId/projects/:projectId"
+            element={
+              <ProtectedRoute>
+                <ProjectDetail />
               </ProtectedRoute>
             }
           />

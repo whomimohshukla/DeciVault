@@ -144,3 +144,5 @@ export default function OrganizationDetail() {
     </div>
   );
 }
+
+import { Link } from 'react-router-dom';

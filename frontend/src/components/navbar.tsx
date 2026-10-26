@@ -5,7 +5,7 @@ import * as React from 'react';
 import { cn } from '../lib/utils';
 import { MenuGlyph, MenuToggle, menuToggleClass } from './menu-toggle';
 import ThemeSwitcherDefault from './theme-switcher';
-import { ThemeSwitcher } from './theme-switcher';
+import ThemeSwitcher from './theme-switcher';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 
 const ThemeSwitcherComp: any = (ThemeSwitcher as any) || ThemeSwitcherDefault;
