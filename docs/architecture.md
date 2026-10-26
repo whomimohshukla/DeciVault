@@ -15,6 +15,7 @@ DeciVault is an AI-powered organizational decision and knowledge management plat
 ## System Components
 
 ### Frontend (React + Vite + TypeScript)
+
 - **Presentation Layer**: React components organized by UI primitives, layouts, and pages
 - **Routing**: React Router for client-side navigation
 - **State Management**: Context API for shared state
@@ -22,6 +23,7 @@ DeciVault is an AI-powered organizational decision and knowledge management plat
 - **Styling**: Tailwind CSS for utility-first styling
 
 ### Backend (Node.js + Express + TypeScript)
+
 - **API Layer**: Express REST API with modular route organization
 - **Application Layer**: Service layer for business logic (to be implemented per module)
 - **Data Access Layer**: Prisma ORM with PostgreSQL for database operations
@@ -30,11 +32,13 @@ DeciVault is an AI-powered organizational decision and knowledge management plat
 - **Error Handling**: Centralized error handling and not-found middleware
 
 ### Database (PostgreSQL)
+
 - **Primary Data Store**: PostgreSQL relational database
 - **ORM**: Prisma for type-safe database access and migrations
 - **Schema Management**: Prisma migrations for version-controlled schema changes
 
 ### Future Components (Planned, Not Yet Implemented)
+
 - **AI Services**: Integration with AI providers for decision insights and knowledge extraction
 - **Background Processing**: Job queues for async tasks like document processing and AI analysis
 - **Search**: Enhanced search capabilities across documents and decisions

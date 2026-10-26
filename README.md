@@ -9,6 +9,7 @@ DeciVault helps organizations capture, track, and manage decisions and knowledge
 ## Technology Stack
 
 ### Frontend
+
 - [React](https://react.dev/) - UI library
 - [Vite](https://vitejs.dev/) - Build tool and dev server
 - [TypeScript](https://www.typescriptlang.org/) - Type safety
@@ -17,6 +18,7 @@ DeciVault helps organizations capture, track, and manage decisions and knowledge
 - [Axios](https://axios-http.com/) - HTTP client
 
 ### Backend
+
 - [Node.js](https://nodejs.org/) - Runtime
 - [Express.js](https://expressjs.com/) - Web framework
 - [TypeScript](https://www.typescriptlang.org/) - Type safety
@@ -27,6 +29,7 @@ DeciVault helps organizations capture, track, and manage decisions and knowledge
 - [Morgan](https://github.com/expressjs/morgan) - HTTP logging
 
 ### Development & Infrastructure
+
 - [npm workspaces](https://docs.npmjs.com/cli/v7/using-npm/workspaces) - Monorepo management
 - [Docker Compose](https://docs.docker.com/compose/) - Local PostgreSQL
 - [Vitest](https://vitest.dev/) - Testing framework
@@ -41,17 +44,20 @@ DeciVault helps organizations capture, track, and manage decisions and knowledge
 ## Installation
 
 1. Clone the repository:
+
 ```bash
 git clone <repository-url>
 cd decivault
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Set up environment variables:
+
 ```bash
 cp .env.example .env
 cp backend/.env.example backend/.env
@@ -63,6 +69,7 @@ Edit the `.env` files with your local configuration.
 ## Environment Setup
 
 ### Root (.env)
+
 ```env
 POSTGRES_USER=decivault
 POSTGRES_PASSWORD=decivault_dev
@@ -71,6 +78,7 @@ POSTGRES_PORT=5432
 ```
 
 ### Backend (backend/.env)
+
 ```env
 NODE_ENV=development
 PORT=3000
@@ -79,6 +87,7 @@ CORS_ORIGIN=http://localhost:5173
 ```
 
 ### Frontend (frontend/.env)
+
 ```env
 VITE_API_BASE_URL=http://localhost:3000/api
 ```
@@ -86,11 +95,13 @@ VITE_API_BASE_URL=http://localhost:3000/api
 ## Starting PostgreSQL
 
 Start the local PostgreSQL database using Docker Compose:
+
 ```bash
 npm run db:up
 ```
 
 Stop the database:
+
 ```bash
 npm run db:down
 ```
@@ -98,6 +109,7 @@ npm run db:down
 ## Running the Application
 
 ### Development mode (both frontend and backend)
+
 ```bash
 npm run dev
 ```
@@ -107,6 +119,7 @@ npm run dev
 - Health check: http://localhost:3000/api/health
 
 ### Run separately
+
 ```bash
 # Frontend only
 npm run dev -w frontend
@@ -118,16 +131,19 @@ npm run dev -w backend
 ## Development Commands
 
 ### Type checking
+
 ```bash
 npm run typecheck
 ```
 
 ### Linting
+
 ```bash
 npm run lint
 ```
 
 ### Formatting
+
 ```bash
 # Format all files
 npm run format
@@ -137,16 +153,19 @@ npm run format:check
 ```
 
 ### Testing
+
 ```bash
 npm run test
 ```
 
 ### Building
+
 ```bash
 npm run build
 ```
 
 ### Prisma Commands
+
 ```bash
 # Generate Prisma Client
 npm run db:generate
@@ -185,4 +204,5 @@ decivault/
 ```
 
 See [docs/architecture.md](docs/architecture.md) for detailed architecture information.
+
 # DeciVault
