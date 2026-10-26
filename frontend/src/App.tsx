@@ -1,13 +1,31 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
+import VerifyEmail from './pages/VerifyEmail';
+import ProtectedRoute from './routes/ProtectedRoute';
+
 function App() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">DeciVault</h1>
-        <p className="text-gray-600">
-          AI-powered organizational decision and knowledge management platform
-        </p>
-      </div>
-    </div>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

@@ -104,14 +104,16 @@ enum NotificationType {
 
 // Models
 model User {
-  id           String     @id @default(cuid())
-  email        String     @unique
-  passwordHash String
-  firstName    String?
-  lastName     String?
-  status       UserStatus @default(ACTIVE)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  id              String     @id @default(cuid())
+  email           String     @unique
+  passwordHash    String
+  firstName       String?
+  lastName        String?
+  status          UserStatus @default(ACTIVE)
+  emailVerified   Boolean    @default(false)
+  emailVerifiedAt DateTime?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
 
   memberships      Membership[]
   invitationsSent  Invitation[] @relation("InvitationInviter")
@@ -127,9 +129,25 @@ model User {
   auditLogs        AuditLog[]
   conversations    Conversation[]
   reviews          Review[]     @relation("ReviewReviewer")
+  emailVerificationTokens EmailVerificationToken[]
 
   @@index([email])
   @@index([status])
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 model Organization {
@@ -307,13 +325,13 @@ model Decision {
 }
 
 model DecisionVersion {
-  id         String   @id @default(cuid())
-  decisionId String
-  version    Int
-  snapshot   Json
-  changedById String
-  changeSummary String? @db.Text
-  createdAt  DateTime @default(now())
+  id            String   @id @default(cuid())
+  decisionId    String
+  version       Int
+  snapshot      Json
+  changedById   String
+  changeSummary String?  @db.Text
+  createdAt     DateTime @default(now())
 
   decision Decision @relation(fields: [decisionId], references: [id], onDelete: Cascade)
   changedBy User    @relation(fields: [changedById], references: [id], onDelete: Restrict)
@@ -325,12 +343,12 @@ model DecisionVersion {
 }
 
 model DecisionEvidence {
-  id            String   @id @default(cuid())
-  decisionId    String
-  documentId    String
+  id              String   @id @default(cuid())
+  decisionId      String
+  documentId      String
   documentChunkId String?
-  note          String?  @db.Text
-  createdAt     DateTime @default(now())
+  note            String?  @db.Text
+  createdAt       DateTime @default(now())
 
   decision      Decision       @relation(fields: [decisionId], references: [id], onDelete: Cascade)
   document      Document      @relation(fields: [documentId], references: [id], onDelete: Restrict)
@@ -343,12 +361,12 @@ model DecisionEvidence {
 }
 
 model DecisionLink {
-  id          String   @id @default(cuid())
-  fromId      String
-  toId        String
+  id           String   @id @default(cuid())
+  fromId       String
+  toId         String
   relationType String
-  note        String?  @db.Text
-  createdAt   DateTime @default(now())
+  note         String?  @db.Text
+  createdAt    DateTime @default(now())
 
   fromDecision Decision @relation("DecisionLinkFrom", fields: [fromId], references: [id], onDelete: Cascade)
   toDecision   Decision @relation("DecisionLinkTo", fields: [toId], references: [id], onDelete: Cascade)
@@ -359,14 +377,14 @@ model DecisionLink {
 }
 
 model Assumption {
-  id                String           @id @default(cuid())
-  decisionId        String
-  description       String           @db.Text
-  status            AssumptionStatus @default(ACTIVE)
-  validationEvidence String?         @db.Text
-  validatedAt       DateTime?
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
+  id                 String           @id @default(cuid())
+  decisionId         String
+  description        String           @db.Text
+  status             AssumptionStatus @default(ACTIVE)
+  validationEvidence String?          @db.Text
+  validatedAt        DateTime?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
 
   decision Decision @relation(fields: [decisionId], references: [id], onDelete: Cascade)
 
@@ -492,7 +510,6 @@ model Integration {
   provider          IntegrationProvider
   status            IntegrationStatus @default(DISCONNECTED)
   externalAccountId String?
-  // Do not store plaintext secrets/tokens
   encryptedConfig   Json?
   lastSyncAt        DateTime?
   createdAt         DateTime          @default(now())
