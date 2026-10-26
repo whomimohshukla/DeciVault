@@ -1,69 +1,47 @@
 import { useAuth } from '../context/AuthContext';
-import { logout, resendVerification } from '../services/auth';
-import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import ChaiNavbar from '../components/layout/ChaiNavbar';
 
 export default function Dashboard() {
-  const { user, setUser } = useAuth();
-  const navigate = useNavigate();
-  const [resendMsg, setResendMsg] = useState('');
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      setUser(null);
-      navigate('/login');
-    } catch {
-      setUser(null);
-      navigate('/login');
-    }
-  };
-
-  const handleResend = async () => {
-    setResendMsg('');
-    try {
-      await resendVerification();
-      setResendMsg('Verification email sent');
-    } catch (err: any) {
-      setResendMsg(err.response?.data?.message || 'Failed to send');
-    }
-  };
+  const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-          >
-            Logout
-          </button>
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.03)_0%,transparent_50%)] pointer-events-none" />
+      <ChaiNavbar />
+      <main className="relative max-w-6xl mx-auto px-6 sm:px-12 py-12">
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-medium mb-2">Dashboard</h1>
+          <p className="text-neutral-400">
+            Welcome back,{' '}
+            <span className="highlight">
+              {user?.firstName || user?.email}
+            </span>
+          </p>
         </div>
-        {!user?.emailVerified && (
-          <div className="bg-yellow-50 border border-yellow-200 p-4 rounded mb-4">
-            <p className="text-yellow-800 mb-2">Your email is not verified.</p>
-            <button
-              onClick={handleResend}
-              className="px-3 py-1 bg-yellow-600 text-white rounded hover:bg-yellow-700"
-            >
-              Resend verification email
-            </button>
-            {resendMsg && <p className="mt-2 text-sm">{resendMsg}</p>}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <Link to="/organizations" className="card-chai p-6 sm:opacity-90 hover:opacity-100 hover:border-orange-50/30 transition-all">
+            <h3 className="font-montserrat text-lg font-semibold mb-2">Organizations</h3>
+            <p className="text-neutral-400 text-sm">Manage your teams and organizations</p>
+          </Link>
+          <div className="card-chai p-6 sm:opacity-90">
+            <h3 className="font-montserrat text-lg font-semibold mb-2">Decisions</h3>
+            <p className="text-neutral-400 text-sm">Track and review decisions (coming soon)</p>
           </div>
-        )}
-        <div className="bg-white p-6 rounded shadow">
-          <h2 className="text-xl font-semibold mb-4">User Profile</h2>
-          <div className="space-y-2">
-            <p><strong>Email:</strong> {user?.email}</p>
-            <p><strong>Email Verified:</strong> {user?.emailVerified ? 'Yes' : 'No'}</p>
-            <p><strong>First Name:</strong> {user?.firstName || '-'}</p>
-            <p><strong>Last Name:</strong> {user?.lastName || '-'}</p>
-            <p><strong>Status:</strong> {user?.status}</p>
+          <div className="card-chai p-6 sm:opacity-90">
+            <h3 className="font-montserrat text-lg font-semibold mb-2">Documents</h3>
+            <p className="text-neutral-400 text-sm">Knowledge base (coming soon)</p>
           </div>
         </div>
-      </div>
+        <div className="card-chai p-6">
+          <h2 className="font-montserrat text-lg font-semibold mb-4">Profile</h2>
+          <div className="space-y-2 text-sm">
+            <p><span className="text-neutral-400">Email:</span> {user?.email}</p>
+            <p><span className="text-neutral-400">Email Verified:</span> {user?.emailVerified ? 'Yes' : 'No'}</p>
+            <p><span className="text-neutral-400">Status:</span> {user?.status}</p>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }

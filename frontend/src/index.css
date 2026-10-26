@@ -3,29 +3,136 @@
 @tailwind utilities;
 
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: Manrope, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
+  color-scheme: dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  background-color: oklch(0.145 0 0);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --border: rgba(251, 191, 36, 0.15);
+  --accent: oklch(0.269 0 0);
+  --ring: oklch(0.439 0 0);
+  --card: rgba(0, 0, 0, 0.1);
+}
+
+.light {
+  color-scheme: light;
+  color: oklch(0.145 0 0);
+  background-color: oklch(0.985 0 0);
+
+  --background: oklch(0.985 0 0);
+  --foreground: oklch(0.145 0 0);
+  --muted-foreground: oklch(0.439 0 0);
+  --border: rgba(120, 53, 15, 0.15);
+  --accent: oklch(0.97 0 0);
+  --ring: oklch(0.708 0 0);
+  --card: rgba(255, 255, 255, 0.7);
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  background-color: var(--background);
+  color: var(--foreground);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    font-family: Manrope, system-ui, sans-serif;
   }
+}
+
+.font-onest {
+  font-family: Onest, system-ui, sans-serif;
+}
+
+.btn-asym {
+  border-radius: 0 0.5rem 0 0.5rem;
+}
+
+.btn-asym-mirror {
+  border-radius: 0.5rem 0 0.5rem 0;
+}
+
+.highlight {
+  font-family: Montserrat, system-ui, sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  text-transform: capitalize;
+  color: rgb(254 215 170);
+}
+
+.dark .highlight {
+  color: rgb(251 146 60);
+}
+
+.light .highlight {
+  color: rgb(146 64 14);
+}
+
+.chai-backdrop {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 2000px;
+  pointer-events: none;
+  mask-image: linear-gradient(to bottom, black 0%, transparent 80%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 80%);
+}
+
+@keyframes chai-spin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.card-chai {
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+  background-color: var(--card);
+  backdrop-filter: blur(4px);
+}
+
+.bg-background {
+  background-color: var(--background);
+}
+
+.text-foreground {
+  color: var(--foreground);
+}
+
+.text-muted-foreground {
+  color: var(--muted-foreground);
+}
+
+.border-border {
+  border-color: var(--border);
+}
+
+.bg-accent\/60 {
+  background-color: color-mix(in oklch, var(--accent) 60%, transparent);
+}
+
+.hover\:bg-accent\/60:hover {
+  background-color: color-mix(in oklch, var(--accent) 60%, transparent);
+}
+
+.hover\:text-foreground:hover {
+  color: var(--foreground);
 }
