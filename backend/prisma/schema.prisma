@@ -48,7 +48,6 @@ enum DecisionStatus {
   APPROVED
   REJECTED
   SUPERSEDED
-  ARCHIVED
 }
 
 enum AssumptionStatus {
@@ -115,20 +114,21 @@ model User {
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
 
-  memberships      Membership[]
-  invitationsSent  Invitation[] @relation("InvitationInviter")
-  createdProjects  Project[]    @relation("ProjectCreator")
-  uploadedDocuments Document[] @relation("DocumentUploader")
-  createdDecisions Decision[]  @relation("DecisionCreator")
-  ownedDecisions   Decision[]  @relation("DecisionOwner")
-  decisionVersions DecisionVersion[]
-  tasksCreated     Task[]      @relation("TaskCreator")
-  tasksAssigned    Task[]      @relation("TaskAssignee")
-  comments         Comment[]
-  notifications    Notification[]
-  auditLogs        AuditLog[]
-  conversations    Conversation[]
-  reviews          Review[]     @relation("ReviewReviewer")
+  memberships             Membership[]
+  invitationsSent         Invitation[]             @relation("InvitationInviter")
+  createdProjects         Project[]                @relation("ProjectCreator")
+  uploadedDocuments       Document[]               @relation("DocumentUploader")
+  createdDecisions        Decision[]               @relation("DecisionCreator")
+  ownedDecisions          Decision[]               @relation("DecisionOwner")
+  approvedDecisions       Decision[]               @relation("DecisionApprover")
+  decisionVersions        DecisionVersion[]
+  tasksCreated            Task[]                   @relation("TaskCreator")
+  tasksAssigned           Task[]                   @relation("TaskAssignee")
+  comments                Comment[]
+  notifications           Notification[]
+  auditLogs               AuditLog[]
+  conversations           Conversation[]
+  reviews                 Review[]                 @relation("ReviewReviewer")
   emailVerificationTokens EmailVerificationToken[]
   passwordResetTokens     PasswordResetToken[]
 
@@ -234,24 +234,24 @@ model Project {
 }
 
 model Document {
-  id               String                  @id @default(cuid())
+  id               String                   @id @default(cuid())
   filename         String
   mimeType         String
   fileSize         Int
-  storageKey       String                  @unique
+  storageKey       String                   @unique
   processingStatus DocumentProcessingStatus @default(PENDING)
-  processingError  String?                 @db.Text
+  processingError  String?                  @db.Text
   organizationId   String
   projectId        String?
   uploadedById     String
-  createdAt        DateTime                @default(now())
-  updatedAt        DateTime                @updatedAt
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   project      Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  uploadedBy   User        @relation("DocumentUploader", fields: [uploadedById], references: [id], onDelete: Restrict)
+  uploadedBy   User         @relation("DocumentUploader", fields: [uploadedById], references: [id], onDelete: Restrict)
 
-  chunks          DocumentChunk[]
+  chunks           DocumentChunk[]
   decisionEvidence DecisionEvidence[]
 
   @@index([organizationId])
@@ -270,7 +270,7 @@ model DocumentChunk {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  document        Document          @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  document         Document           @relation(fields: [documentId], references: [id], onDelete: Cascade)
   decisionEvidence DecisionEvidence[]
 
   @@unique([documentId, chunkIndex])
@@ -282,20 +282,24 @@ model Decision {
   id             String         @id @default(cuid())
   title          String
   description    String         @db.Text
+  problemContext String?        @db.Text
   rationale      String?        @db.Text
   alternatives   Json?
   risks          Json?
   consequences   Json?
   status         DecisionStatus @default(PROPOSED)
   decisionDate   DateTime?
+  effectiveDate  DateTime?
   approvedAt     DateTime?
   rejectedAt     DateTime?
   approvalNotes  String?        @db.Text
   rejectionNotes String?        @db.Text
+  archivedAt     DateTime?
   organizationId String
   projectId      String?
   createdById    String
   ownerId        String
+  approverId     String?
   supersededById String?        @unique
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
@@ -304,24 +308,27 @@ model Decision {
   project      Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
   createdBy    User         @relation("DecisionCreator", fields: [createdById], references: [id], onDelete: Restrict)
   owner        User         @relation("DecisionOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  approver     User?        @relation("DecisionApprover", fields: [approverId], references: [id], onDelete: SetNull)
   supersededBy Decision?    @relation("DecisionSupersession", fields: [supersededById], references: [id], onDelete: SetNull)
   supersedes   Decision?    @relation("DecisionSupersession")
 
-  versions        DecisionVersion[]
-  evidence        DecisionEvidence[]
-  linksFrom       DecisionLink[]     @relation("DecisionLinkFrom")
-  linksTo         DecisionLink[]     @relation("DecisionLinkTo")
-  assumptions     Assumption[]
-  reviews         Review[]
-  tasks           Task[]
-  comments        Comment[]
+  versions    DecisionVersion[]
+  evidence    DecisionEvidence[]
+  linksFrom   DecisionLink[]     @relation("DecisionLinkFrom")
+  linksTo     DecisionLink[]     @relation("DecisionLinkTo")
+  assumptions Assumption[]
+  reviews     Review[]
+  tasks       Task[]
+  comments    Comment[]
 
   @@index([organizationId])
   @@index([projectId])
   @@index([createdById])
   @@index([ownerId])
+  @@index([approverId])
   @@index([status])
   @@index([decisionDate])
+  @@index([effectiveDate])
   @@index([createdAt])
 }
 
@@ -334,8 +341,8 @@ model DecisionVersion {
   changeSummary String?  @db.Text
   createdAt     DateTime @default(now())
 
-  decision Decision @relation(fields: [decisionId], references: [id], onDelete: Cascade)
-  changedBy User    @relation(fields: [changedById], references: [id], onDelete: Restrict)
+  decision  Decision @relation(fields: [decisionId], references: [id], onDelete: Cascade)
+  changedBy User     @relation(fields: [changedById], references: [id], onDelete: Restrict)
 
   @@unique([decisionId, version])
   @@index([decisionId])
@@ -352,7 +359,7 @@ model DecisionEvidence {
   createdAt       DateTime @default(now())
 
   decision      Decision       @relation(fields: [decisionId], references: [id], onDelete: Cascade)
-  document      Document      @relation(fields: [documentId], references: [id], onDelete: Restrict)
+  document      Document       @relation(fields: [documentId], references: [id], onDelete: Restrict)
   documentChunk DocumentChunk? @relation(fields: [documentChunkId], references: [id], onDelete: SetNull)
 
   @@unique([decisionId, documentId, documentChunkId])
@@ -430,7 +437,7 @@ model Task {
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   project      Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  decision     Decision?   @relation(fields: [decisionId], references: [id], onDelete: SetNull)
+  decision     Decision?    @relation(fields: [decisionId], references: [id], onDelete: SetNull)
   createdBy    User         @relation("TaskCreator", fields: [createdById], references: [id], onDelete: Restrict)
   assignee     User?        @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
 
@@ -506,15 +513,15 @@ model AuditLog {
 }
 
 model Integration {
-  id                String            @id @default(cuid())
+  id                String              @id @default(cuid())
   organizationId    String
   provider          IntegrationProvider
-  status            IntegrationStatus @default(DISCONNECTED)
+  status            IntegrationStatus   @default(DISCONNECTED)
   externalAccountId String?
   encryptedConfig   Json?
   lastSyncAt        DateTime?
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
 

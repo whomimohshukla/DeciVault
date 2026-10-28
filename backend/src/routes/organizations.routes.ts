@@ -11,6 +11,13 @@ import {
   update as updateProject,
   remove as removeProject,
 } from '../modules/projects/projects.controller.js';
+import {
+  create as createDecision,
+  list as listDecisions,
+  get as getDecision,
+  update as updateDecision,
+  remove as removeDecision,
+} from '../modules/decisions/decisions.controller.js';
 
 const router = Router();
 
@@ -40,5 +47,12 @@ router.get('/:organizationId/projects', requireAuth, requireOrgMember, listProje
 router.get('/:organizationId/projects/:projectId', requireAuth, requireOrgMember, getProject);
 router.patch('/:organizationId/projects/:projectId', requireAuth, requireOrgMember, requireOrgRole(['OWNER', 'ADMIN', 'MEMBER']), updateProject);
 router.delete('/:organizationId/projects/:projectId', requireAuth, requireOrgMember, requireOrgRole(['OWNER', 'ADMIN']), removeProject);
+
+// Decisions
+router.post('/:organizationId/decisions', requireAuth, requireOrgMember, requireOrgRole(['OWNER', 'ADMIN', 'MEMBER']), createDecision);
+router.get('/:organizationId/decisions', requireAuth, requireOrgMember, listDecisions);
+router.get('/:organizationId/decisions/:decisionId', requireAuth, requireOrgMember, getDecision);
+router.patch('/:organizationId/decisions/:decisionId', requireAuth, requireOrgMember, requireOrgRole(['OWNER', 'ADMIN', 'MEMBER']), updateDecision);
+router.delete('/:organizationId/decisions/:decisionId', requireAuth, requireOrgMember, requireOrgRole(['OWNER', 'ADMIN']), removeDecision);
 
 export default router;

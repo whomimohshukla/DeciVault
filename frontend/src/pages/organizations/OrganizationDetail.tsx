@@ -3,12 +3,12 @@ import { useParams, Link } from 'react-router-dom';
 import { getOrganization, listMembers, inviteMember, updateMemberRole, removeMember, leaveOrganization } from '../../services/organizations';
 import { useAuth } from '../../context/AuthContext';
 import AppLayout from '../../components/layout/AppLayout';
-import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import Input from '../../components/ui/Input';
+import Card from '../../components/ui/card';
+import Button from '../../components/ui/button';
+import Input from '../../components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import LoadingSkeleton from '../../components/shared/LoadingSkeleton';
-import { Users, Mail, FolderKanban, ArrowLeft, Plus } from 'lucide-react';
+import { Users, Mail, FolderKanban, ArrowLeft, Plus, ClipboardList } from 'lucide-react';
 
 export default function OrganizationDetail() {
   const { organizationId } = useParams<{ organizationId: string }>();
@@ -124,12 +124,20 @@ export default function OrganizationDetail() {
               <p className="text-text-secondary mt-1">{org?.slug}</p>
             </div>
           </div>
-          <Link to={`/organizations/${organizationId}/projects`}>
-            <Button>
-              <FolderKanban className="w-4 h-4" />
-              View Projects
-            </Button>
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link to={`/organizations/${organizationId}/projects`}>
+              <Button>
+                <FolderKanban className="w-4 h-4" />
+                View Projects
+              </Button>
+            </Link>
+            <Link to={`/organizations/${organizationId}/decisions`}>
+              <Button variant="outline">
+                <ClipboardList className="w-4 h-4" />
+                Decision Register
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {error && (

@@ -1,13 +1,11 @@
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Building2, 
-  FolderKanban, 
-  Users, 
-  Settings, 
+import {
+  LayoutDashboard,
+  Building2,
+  Users,
   LogOut,
   Menu,
-  X
+  X,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';

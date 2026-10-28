@@ -8,12 +8,14 @@ import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { listOrganizations } from "@/services/organizations"
 import { listProjects } from "@/services/projects"
-import { Building2, FolderKanban, Users, Plus, ArrowRight } from "lucide-react"
+import { listDecisions } from "@/services/decisions"
+import { Building2, FolderKanban, Users, Plus, ArrowRight, ClipboardList } from "lucide-react"
 
 export default function Dashboard() {
   const { user } = useAuth()
   const [organizations, setOrganizations] = useState<any[]>([])
   const [projects, setProjects] = useState<any[]>([])
+  const [decisions, setDecisions] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -25,8 +27,12 @@ export default function Dashboard() {
         
         if (orgs.length > 0) {
           try {
-            const projRes = await listProjects(orgs[0].id)
+            const [projRes, decRes] = await Promise.all([
+              listProjects(orgs[0].id),
+              listDecisions(orgs[0].id)
+            ])
             setProjects(projRes.data?.projects || [])
+            setDecisions(decRes.data?.decisions || [])
           } catch {
             // ignore
           }
@@ -60,7 +66,7 @@ export default function Dashboard() {
           </Button>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Organizations</CardTitle>
@@ -84,6 +90,19 @@ export default function Dashboard() {
                 <Skeleton className="h-8 w-16" />
               ) : (
                 <div className="text-2xl font-bold">{projects.length}</div>
+              )}
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Decisions</CardTitle>
+              <ClipboardList className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <Skeleton className="h-8 w-16" />
+              ) : (
+                <div className="text-2xl font-bold">{decisions.length}</div>
               )}
             </CardContent>
           </Card>
@@ -159,27 +178,81 @@ export default function Dashboard() {
           </Card>
           <Card className="col-span-3">
             <CardHeader>
-              <CardTitle>Quick actions</CardTitle>
-              <CardDescription>Common tasks and navigation</CardDescription>
+              <CardTitle>Recent decisions</CardTitle>
+              <CardDescription>Latest decisions from your workspace</CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-2">
-              <Button variant="ghost" className="justify-start" asChild>
-                <Link to="/organizations">
-                  <Building2 className="mr-2 h-4 w-4" />
-                  Manage organizations
-                  <ArrowRight className="ml-auto h-4 w-4" />
-                </Link>
-              </Button>
-              <Button variant="ghost" className="justify-start" asChild>
-                <Link to="/invitations">
-                  <Users className="mr-2 h-4 w-4" />
-                  View invitations
-                  <ArrowRight className="ml-auto h-4 w-4" />
-                </Link>
-              </Button>
+            <CardContent>
+              {loading ? (
+                <div className="space-y-3">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="space-y-2">
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-4 w-full" />
+                    </div>
+                  ))}
+                </div>
+              ) : decisions.length > 0 ? (
+                <div className="space-y-4">
+                  {decisions.slice(0, 5).map((decision) => (
+                    <div key={decision.id} className="space-y-1">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-sm font-medium leading-none">{decision.title}</p>
+                        <Badge variant="secondary" className="text-[10px]">{decision.status}</Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {decision.project?.name || 'No project'} • {decision.decisionDate ? new Date(decision.decisionDate).toLocaleDateString() : 'No date'}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <ClipboardList className="h-8 w-8 text-muted-foreground mb-2" />
+                  <p className="text-sm font-medium">No decisions yet</p>
+                  <p className="text-sm text-muted-foreground mb-4">Capture the first decision in the register</p>
+                  <Button asChild size="sm">
+                    <Link to={organizations[0] ? `/organizations/${organizations[0].id}/decisions` : '/organizations'}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add decision
+                    </Link>
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick actions</CardTitle>
+            <CardDescription>Common tasks and navigation</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-2">
+            <Button variant="ghost" className="justify-start" asChild>
+              <Link to="/organizations">
+                <Building2 className="mr-2 h-4 w-4" />
+                Manage organizations
+                <ArrowRight className="ml-auto h-4 w-4" />
+              </Link>
+            </Button>
+            <Button variant="ghost" className="justify-start" asChild>
+              <Link to="/invitations">
+                <Users className="mr-2 h-4 w-4" />
+                View invitations
+                <ArrowRight className="ml-auto h-4 w-4" />
+              </Link>
+            </Button>
+            {organizations[0] && (
+              <Button variant="ghost" className="justify-start" asChild>
+                <Link to={`/organizations/${organizations[0].id}/decisions`}>
+                  <ClipboardList className="mr-2 h-4 w-4" />
+                  Open decision register
+                  <ArrowRight className="ml-auto h-4 w-4" />
+                </Link>
+              </Button>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </AppShell>
   )

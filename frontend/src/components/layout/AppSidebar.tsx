@@ -1,4 +1,4 @@
-import { Building2, FolderKanban, LayoutDashboard, LogOut, Users } from "lucide-react"
+import { Building2, LayoutDashboard, LogOut, Users } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
 import {
   Sidebar,

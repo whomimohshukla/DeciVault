@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
-import Button from '../components/ui/Button';
-import Card from '../components/ui/Card';
+import Button from '../components/ui/button';
+import Card from '../components/ui/card';
 import { ArrowRight, Brain, Users, FolderKanban, Shield } from 'lucide-react';
 
 export default function Landing() {

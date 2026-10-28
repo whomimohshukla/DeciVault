@@ -13,6 +13,7 @@ import OrganizationDetail from './pages/organizations/OrganizationDetail';
 import Invitations from './pages/organizations/Invitations';
 import ProjectList from './pages/projects/ProjectList';
 import ProjectDetail from './pages/projects/ProjectDetail';
+import DecisionRegister from './pages/decisions/DecisionRegister';
 
 function App() {
   return (
@@ -70,6 +71,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ProjectDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/organizations/:organizationId/decisions"
+            element={
+              <ProtectedRoute>
+                <DecisionRegister />
               </ProtectedRoute>
             }
           />

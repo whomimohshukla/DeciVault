@@ -38,7 +38,7 @@ export function Hero({
           {(primary || secondary) && (
             <div className={cn('mt-6 flex flex-wrap items-center gap-4', centred && 'justify-center')}>
               {primary && (
-                <a href={primary.href} {...ext(primary)} className={buttonVariants({ variant: 'solid' })}>
+                <a href={primary.href} {...ext(primary)} className={buttonVariants({ variant: 'default' })}>
                   {primary.label}
                   <ArrowUpRight className="-ml-1" aria-hidden="true" />
                 </a>
