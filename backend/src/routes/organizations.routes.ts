@@ -17,7 +17,21 @@ import {
   get as getDecision,
   update as updateDecision,
   remove as removeDecision,
+  listEvidence,
+  addEvidence,
+  removeEvidence,
+  listHistory,
+  listRelationships,
+  addRelationship,
+  removeRelationship,
 } from '../modules/decisions/decisions.controller.js';
+import {
+  create as createDocument,
+  list as listDocuments,
+  get as getDocument,
+  download as downloadDocument,
+  remove as removeDocument,
+} from '../modules/documents/documents.controller.js';
 
 const router = Router();
 
@@ -48,11 +62,25 @@ router.get('/:organizationId/projects/:projectId', requireAuth, requireOrgMember
 router.patch('/:organizationId/projects/:projectId', requireAuth, requireOrgMember, requireOrgRole(['OWNER', 'ADMIN', 'MEMBER']), updateProject);
 router.delete('/:organizationId/projects/:projectId', requireAuth, requireOrgMember, requireOrgRole(['OWNER', 'ADMIN']), removeProject);
 
+// Documents
+router.get('/:organizationId/documents', requireAuth, requireOrgMember, listDocuments);
+router.post('/:organizationId/documents', requireAuth, requireOrgMember, requireOrgRole(['OWNER', 'ADMIN', 'MEMBER']), createDocument);
+router.get('/:organizationId/documents/:documentId', requireAuth, requireOrgMember, getDocument);
+router.get('/:organizationId/documents/:documentId/download', requireAuth, requireOrgMember, downloadDocument);
+router.delete('/:organizationId/documents/:documentId', requireAuth, requireOrgMember, requireOrgRole(['OWNER', 'ADMIN']), removeDocument);
+
 // Decisions
 router.post('/:organizationId/decisions', requireAuth, requireOrgMember, requireOrgRole(['OWNER', 'ADMIN', 'MEMBER']), createDecision);
 router.get('/:organizationId/decisions', requireAuth, requireOrgMember, listDecisions);
 router.get('/:organizationId/decisions/:decisionId', requireAuth, requireOrgMember, getDecision);
 router.patch('/:organizationId/decisions/:decisionId', requireAuth, requireOrgMember, requireOrgRole(['OWNER', 'ADMIN', 'MEMBER']), updateDecision);
 router.delete('/:organizationId/decisions/:decisionId', requireAuth, requireOrgMember, requireOrgRole(['OWNER', 'ADMIN']), removeDecision);
+router.get('/:organizationId/decisions/:decisionId/evidence', requireAuth, requireOrgMember, listEvidence);
+router.post('/:organizationId/decisions/:decisionId/evidence', requireAuth, requireOrgMember, requireOrgRole(['OWNER', 'ADMIN', 'MEMBER']), addEvidence);
+router.delete('/:organizationId/decisions/:decisionId/evidence/:documentId', requireAuth, requireOrgMember, requireOrgRole(['OWNER', 'ADMIN', 'MEMBER']), removeEvidence);
+router.get('/:organizationId/decisions/:decisionId/history', requireAuth, requireOrgMember, listHistory);
+router.get('/:organizationId/decisions/:decisionId/relationships', requireAuth, requireOrgMember, listRelationships);
+router.post('/:organizationId/decisions/:decisionId/relationships', requireAuth, requireOrgMember, requireOrgRole(['OWNER', 'ADMIN', 'MEMBER']), addRelationship);
+router.delete('/:organizationId/decisions/:decisionId/relationships/:relatedDecisionId/:relationType', requireAuth, requireOrgMember, requireOrgRole(['OWNER', 'ADMIN', 'MEMBER']), removeRelationship);
 
 export default router;

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 export const decisionStatusSchema = z.enum(['PROPOSED', 'APPROVED', 'REJECTED', 'SUPERSEDED']);
+export const decisionRelationshipTypeSchema = z.enum(['RELATED_TO', 'DEPENDS_ON', 'SUPERSEDES']);
 
 export const createDecisionSchema = z.object({
   title: z.string().trim().min(1, 'Title is required').max(200),
@@ -32,4 +33,10 @@ export const updateDecisionSchema = z.object({
   effectiveDate: z.string().optional().nullable(),
   approvalNotes: z.string().trim().max(5000).optional().nullable(),
   rejectionNotes: z.string().trim().max(5000).optional().nullable(),
+});
+
+export const decisionRelationshipSchema = z.object({
+  relatedDecisionId: z.string().trim().min(1, 'Related decision is required'),
+  relationType: decisionRelationshipTypeSchema,
+  note: z.string().trim().max(2000).optional().nullable(),
 });

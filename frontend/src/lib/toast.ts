@@ -1,0 +1,22 @@
+import { toast } from 'sonner';
+
+export const notifySuccess = (title: string, description?: string) => {
+  toast.success(title, {
+    description,
+    duration: 4000,
+  });
+};
+
+export const notifyError = (title: string, description?: string) => {
+  toast.error(title, {
+    description,
+    duration: 5000,
+  });
+};
+
+export const notifyInfo = (title: string, description?: string) => {
+  toast(title, {
+    description,
+    duration: 4000,
+  });
+};

@@ -1,36 +1,18 @@
 import { Moon, Sun } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useTheme } from 'next-themes';
 
 export function ThemeSwitcher() {
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
-
-  useEffect(() => {
-    const stored = localStorage.getItem('decivault-theme') as 'dark' | 'light' | null;
-    if (stored) {
-      setTheme(stored);
-      document.documentElement.classList.remove('dark', 'light');
-      document.documentElement.classList.add(stored);
-    } else {
-      document.documentElement.classList.remove('light');
-      document.documentElement.classList.add('dark');
-    }
-  }, []);
-
-  const toggle = () => {
-    const next = theme === 'dark' ? 'light' : 'dark';
-    setTheme(next);
-    localStorage.setItem('decivault-theme', next);
-    document.documentElement.classList.remove('dark', 'light');
-    document.documentElement.classList.add(next);
-  };
+  const { theme, setTheme } = useTheme();
+  const isDark = theme === 'dark';
 
   return (
     <button
-      onClick={toggle}
-      className="inline-flex h-9 w-9 items-center justify-center rounded-lg hover:bg-accent/60 transition-colors"
+      type="button"
+      onClick={() => setTheme(isDark ? 'light' : 'dark')}
+      className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border/80 bg-background/80 text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-[#f5c542]/40 hover:bg-[#f5c542]/10 hover:text-[#d8a521]"
       aria-label="Toggle theme"
     >
-      {theme === 'dark' ? <Sun width={16} height={16} /> : <Moon width={16} height={16} />}
+      {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
     </button>
   );
 }

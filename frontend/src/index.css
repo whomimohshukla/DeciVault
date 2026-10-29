@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,52 +7,111 @@
 @layer base {
   :root {
     --background: 210 40% 98%;
-    --foreground: 215 25% 27%;
+    --foreground: 220 25% 15%;
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 27%;
+    --card-foreground: 220 25% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 27%;
-    --primary: 180 78% 23%;
+    --popover-foreground: 220 25% 15%;
+    --primary: 183 64% 28%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 215 25% 27%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 180 78% 96%;
-    --accent-foreground: 180 78% 23%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 180 78% 23%;
-    --radius: 0.5rem;
-    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --secondary: 44 92% 93%;
+    --secondary-foreground: 220 25% 15%;
+    --muted: 210 25% 96%;
+    --muted-foreground: 220 13% 40%;
+    --accent: 183 62% 34%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 52%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 216 24% 88%;
+    --input: 216 24% 88%;
+    --ring: 183 64% 28%;
+    --radius: 1rem;
+    --shadow-soft: 0 24px 60px rgba(15, 23, 42, 0.08);
+    --sidebar-background: 224 44% 10%;
+    --sidebar-foreground: 210 20% 96%;
+    --sidebar-primary: 183 64% 46%;
+    --sidebar-primary-foreground: 224 46% 10%;
+    --sidebar-accent: 224 32% 16%;
+    --sidebar-accent-foreground: 210 20% 96%;
+    --sidebar-border: 224 24% 20%;
+    --sidebar-ring: 183 64% 46%;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  .dark {
+    --background: 222 47% 9%;
+    --foreground: 210 20% 96%;
+    --card: 222 33% 12%;
+    --card-foreground: 210 20% 96%;
+    --popover: 222 33% 12%;
+    --popover-foreground: 210 20% 96%;
+    --primary: 183 68% 46%;
+    --primary-foreground: 222 47% 9%;
+    --secondary: 223 26% 18%;
+    --secondary-foreground: 210 20% 96%;
+    --muted: 222 28% 15%;
+    --muted-foreground: 216 15% 74%;
+    --accent: 183 68% 46%;
+    --accent-foreground: 222 47% 9%;
+    --destructive: 0 72% 52%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 223 24% 22%;
+    --input: 223 24% 22%;
+    --ring: 183 68% 46%;
+    --shadow-soft: 0 30px 80px rgba(2, 6, 23, 0.52);
+    --sidebar-background: 222 42% 6%;
+    --sidebar-foreground: 210 20% 96%;
+    --sidebar-primary: 183 68% 46%;
+    --sidebar-primary-foreground: 222 42% 6%;
+    --sidebar-accent: 223 22% 12%;
+    --sidebar-accent-foreground: 210 20% 96%;
+    --sidebar-border: 223 20% 18%;
+    --sidebar-ring: 183 68% 46%;
   }
 
   * {
     @apply border-border;
   }
-  
+
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-background text-foreground;
+    background-image: radial-gradient(circle at top, rgba(13, 158, 166, 0.12), transparent 28%), linear-gradient(180deg, #f7fafb 0%, #eef5f6 100%);
     font-feature-settings: "rlig" 1, "calt" 1;
   }
-  .dark {
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+
+  .dark body {
+    background-image: radial-gradient(circle at top, rgba(26, 201, 211, 0.12), transparent 24%), linear-gradient(180deg, #07111f 0%, #0c1726 100%);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Manrope', 'Inter', sans-serif;
+    letter-spacing: -0.04em;
+  }
+
+  button, input, select, textarea {
+    font-family: inherit;
+  }
+}
+
+@layer components {
+  .premium-panel {
+    @apply rounded-[28px] border border-border/80 bg-white/80 backdrop-blur-sm shadow-[var(--shadow-soft)] dark:bg-slate-900/80;
+  }
+
+  .premium-grid {
+    background-image: linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+
+  .brand-gradient {
+    background: linear-gradient(135deg, #0E6669 0%, #1b8a93 50%, #40c4c8 100%);
+  }
+
+  .brand-glow {
+    box-shadow: 0 24px 60px rgba(14, 102, 105, 0.25);
   }
 }

@@ -239,7 +239,9 @@ export default function DecisionRegister() {
                     {decisions.map((decision) => (
                       <TableRow key={decision.id}>
                         <TableCell>
-                          <div className="font-medium">{decision.title}</div>
+                          <Link to={`/organizations/${organizationId}/decisions/${decision.id}`} className="font-medium text-primary hover:underline">
+                            {decision.title}
+                          </Link>
                           <div className="text-xs text-muted-foreground">{decision.description.slice(0, 80)}{decision.description.length > 80 ? '…' : ''}</div>
                         </TableCell>
                         <TableCell>{decision.project?.name || '—'}</TableCell>

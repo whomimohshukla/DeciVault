@@ -48,33 +48,38 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar>
-      <SidebarHeader>
+    <Sidebar className="border-r border-[#d9ecf0] bg-[linear-gradient(180deg,#0b1d24_0%,#0f2530_100%)] text-white">
+      <SidebarHeader className="border-b border-white/10 bg-white/5">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <Link to="/dashboard">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <span className="text-xs font-semibold">DV</span>
+            <SidebarMenuButton size="lg" asChild className="rounded-xl hover:bg-white/10 data-[active=true]:bg-white/10">
+              <Link to="/dashboard" className="flex items-center gap-3">
+                <div className="flex aspect-square size-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#0E6669] via-[#2a8d92] to-[#5fc7cc] text-xs font-bold text-white ring-1 ring-white/20">
+                  DV
                 </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
+                <div className="grid flex-1 text-left text-sm leading-tight text-white">
                   <span className="truncate font-semibold">DeciVault</span>
-                  <span className="truncate text-xs">Workspace</span>
+                  <span className="truncate text-[11px] text-slate-300">Workspace</span>
                 </div>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="bg-transparent">
         <SidebarGroup>
-          <SidebarGroupLabel>Workspace</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.2em] text-slate-300/80">Workspace</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={location.pathname === item.url || (item.url !== "/dashboard" && location.pathname.startsWith(item.url))}>
-                    <Link to={item.url}>
+                  <SidebarMenuButton
+                    asChild
+                    size="lg"
+                    isActive={location.pathname === item.url || (item.url !== "/dashboard" && location.pathname.startsWith(item.url))}
+                    className="rounded-xl hover:bg-white/10 data-[active=true]:bg-[#93e9ed]/12 data-[active=true]:text-white"
+                  >
+                    <Link to={item.url} className="text-white/90">
                       <item.icon />
                       <span>{item.title}</span>
                     </Link>
@@ -85,27 +90,25 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className="border-t border-white/10 bg-white/5">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton>
-              <div className="flex aspect-square size-8 items-center justify-center rounded-full bg-muted">
-                <span className="text-xs font-medium">
-                  {user?.firstName?.[0] || user?.email?.[0]?.toUpperCase() || "U"}
-                </span>
+            <SidebarMenuButton className="rounded-xl hover:bg-white/10">
+              <div className="flex aspect-square size-8 items-center justify-center rounded-full bg-[#a7f0f2] text-xs font-semibold text-[#0b3941]">
+                {user?.firstName?.[0] || user?.email?.[0]?.toUpperCase() || "U"}
               </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
+              <div className="grid flex-1 text-left text-sm leading-tight text-white">
                 <span className="truncate font-medium">
                   {user?.firstName && user?.lastName
                     ? `${user.firstName} ${user.lastName}`
                     : user?.firstName || user?.email}
                 </span>
-                <span className="truncate text-xs text-muted-foreground">{user?.email}</span>
+                <span className="truncate text-xs text-slate-300">{user?.email}</span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={handleLogout}>
+            <SidebarMenuButton onClick={handleLogout} className="rounded-xl text-white hover:bg-white/10 hover:text-white">
               <LogOut />
               <span>Log out</span>
             </SidebarMenuButton>

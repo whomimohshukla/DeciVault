@@ -1,6 +1,8 @@
 ALTER TYPE "DecisionStatus" RENAME TO "DecisionStatus_old";
 CREATE TYPE "DecisionStatus" AS ENUM ('PROPOSED', 'APPROVED', 'REJECTED', 'SUPERSEDED');
 
+ALTER TABLE "Decision" ALTER COLUMN "status" DROP DEFAULT;
+
 ALTER TABLE "Decision"
   ALTER COLUMN "status" TYPE "DecisionStatus"
   USING CASE
@@ -11,6 +13,8 @@ ALTER TABLE "Decision"
     WHEN "status"::text = 'ARCHIVED' THEN 'PROPOSED'::"DecisionStatus"
     ELSE 'PROPOSED'::"DecisionStatus"
   END;
+
+ALTER TABLE "Decision" ALTER COLUMN "status" SET DEFAULT 'PROPOSED';
 
 DROP TYPE "DecisionStatus_old";
 
